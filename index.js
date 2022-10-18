@@ -1,6 +1,16 @@
 var player;
 var enemy;
 
+
+class Sprite {
+    constructor({position,velocity}) {
+        this.position = position;
+        this.velocity = velocity;
+        this.height = 150;
+    }
+}
+
+
 function startGame() {
     myGameArea.start();
     player = new component(50, 150, "red", 40, 0);
@@ -16,10 +26,11 @@ var myGameArea = {
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.interval = setInterval(updateGameArea, 20);
         window.addEventListener('keydown', function (e) {
-            myGameArea.key = e.keyCode;
+            myGameArea.keys = (myGameArea.keys || []);
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");
         })
         window.addEventListener('keyup', function (e) {
-            myGameArea.key = false;
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");            
         })
     }, 
     stop : function() {
@@ -38,7 +49,7 @@ function component(width, height, color, x, y) {
     this.speedY = 0;    
     this.x = x;
     this.y = y;    
-    this.gravity = 0.2;
+    this.gravity = 0.7;
     this.gravitySpeed = 0;
     this.update = function() {
         ctx = myGameArea.context;
@@ -49,6 +60,7 @@ function component(width, height, color, x, y) {
         this.gravitySpeed += this.gravity;
         this.x += this.speedX;
         this.y += this.speedY + this.gravitySpeed;
+        
         this.hitBottom();
         this.hitRight();
         this.hitTop();
@@ -57,7 +69,10 @@ function component(width, height, color, x, y) {
     this.hitBottom = function() {
         var bottom = myGameArea.canvas.height - this.height;
         if (this.y > bottom){
+            this.gravitySpeed = 0 ;
             this.y = bottom;
+        } else {
+            player.speedY = 0 ;
         }
     }
     this.hitRight = function() {
@@ -83,15 +98,15 @@ function updateGameArea() {
     player.speedX = 0;
     player.speedY = 0;    
 
-    if (myGameArea.key == 37) {player.speedX = -7; myGameArea.clear() }
-    if (myGameArea.key == 39) {player.speedX = 7; myGameArea.clear() }
-    if (myGameArea.key == 38) {player.speedY = -7; myGameArea.clear() }
-    if (myGameArea.key == 40) {player.speedY = 7; myGameArea.clear()}
+    if (myGameArea.keys && myGameArea.keys[37]) {player.speedX = -10; myGameArea.clear() }
+    if (myGameArea.keys && myGameArea.keys[39]) {player.speedX = 10; myGameArea.clear() }
+   
     
     
-    if (myGameArea.key == 68)  {player.speedX = 80; } else if(myGameArea.key == false ) { myGameArea.clear()}
-    if (myGameArea.key == 65) {player.speedX = -80; } else if(myGameArea.key == false ) { myGameArea.clear()}
-    if (myGameArea.key == 16) {player = new component(40,40,"red",0,700); } else if(myGameArea.key == false ) { myGameArea.clear()}
+    if (myGameArea.keys && myGameArea.keys[68])  {player.speedX = 80; } else if(myGameArea.key == false ) { myGameArea.clear()}
+    if (myGameArea.keys && myGameArea.keys[65]) {player.speedX = -80; } else if(myGameArea.key == false ) { myGameArea.clear()}
+    if (myGameArea.keys && myGameArea.keys[87]) {player.speedY = -20; } else if(myGameArea.key == false ) { myGameArea.clear()}
+    if (myGameArea.keys && myGameArea.keys[16]) {player = new component(50,150,"red",40,0); } else if(myGameArea.key == false ) { myGameArea.clear()}
     player.newPos();    
     player.update();
     enemy.newPos();
